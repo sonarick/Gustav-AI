@@ -1,30 +1,21 @@
-import sys
-from pathlib import Path
 import json
+
 from ollama import chat
 
-
-def resource_path(filename):
-    if getattr(sys, "frozen", False):
-        return Path(sys.executable).parent / filename
-
-    return Path(__file__).parent.parent / filename
-import json
-from pathlib import Path
+from core.paths import CONFIG
 
 
 class GustavAI:
     def __init__(self):
 
-        config_path = resource_path("config.json")
-        print(config_path)
-
-        with open(config_path, "r", encoding="utf-8-sig") as f:
+        with open(CONFIG, "r", encoding="utf-8-sig") as f:
             config = json.load(f)
 
         self.model = config["model"]
         self.temperature = config["temperature"]
         self.language = config["language"]
+
+        ...
 
         self.messages = [
             {
