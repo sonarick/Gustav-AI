@@ -1,19 +1,48 @@
+import sys
+from pathlib import Path
+import json
 from ollama import chat
 
 
+def resource_path(filename):
+    if getattr(sys, "frozen", False):
+        return Path(sys.executable).parent / filename
+
+    return Path(__file__).parent.parent / filename
+import json
+from pathlib import Path
+
+
 class GustavAI:
-    def __init__(self, model="qwen2.5:7b"):
-        self.model = model
+    def __init__(self):
+
+        config_path = resource_path("config.json")
+        print(config_path)
+
+        with open(config_path, "r", encoding="utf-8-sig") as f:
+            config = json.load(f)
+
+        self.model = config["model"]
+        self.temperature = config["temperature"]
+        self.language = config["language"]
 
         self.messages = [
             {
                 "role": "system",
-                "content": (
-                    "Ты — Гюстав, персональный ИИ-помощник Даниила.\n"
-                    "Всегда отвечай только на русском языке.\n"
-                    "Будь дружелюбным, понятным и полезным.\n"
-                    "Не переходи на другие языки без просьбы пользователя."
-                ),
+                "content": f"""
+Ты — Гюстав, персональный ИИ-помощник Даниила.
+
+Правила:
+
+- Всегда отвечай только на русском языке.
+- Никогда не используй китайский язык.
+- Никогда не используй английский язык без прямой просьбы пользователя.
+- Если случайно начал отвечать на другом языке — сразу перепиши ответ полностью на русском.
+- Не показывай свои внутренние рассуждения.
+- Не объясняй ход своих мыслей.
+- Сразу давай готовый ответ.
+- Будь дружелюбным, полезным и кратким.
+"""
             }
         ]
 
@@ -28,6 +57,10 @@ class GustavAI:
         response = chat(
             model=self.model,
             messages=self.messages,
+            think=False,
+            options={
+                "temperature": self.temperature,
+            },
         )
 
         answer = response.message.content

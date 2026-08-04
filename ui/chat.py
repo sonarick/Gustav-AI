@@ -1,44 +1,44 @@
-from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QScrollArea,
+    QListWidget,
+    QListWidgetItem,
 )
+from PySide6.QtCore import Qt
 
 from ui.message import MessageBubble
 
 
-class ChatArea(QScrollArea):
+class ChatArea(QListWidget):
     def __init__(self):
         super().__init__()
 
-        self.setWidgetResizable(True)
+        self.setSpacing(12)
+        self.setWordWrap(True)
+
+        self.setSelectionMode(QListWidget.NoSelection)
+        self.setFocusPolicy(Qt.NoFocus)
+
+        self.setVerticalScrollMode(QListWidget.ScrollPerPixel)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
-        self.container = QWidget()
-        self.layout = QVBoxLayout(self.container)
-
-        self.layout.setSpacing(12)
-        self.layout.setContentsMargins(15, 15, 15, 15)
-        self.layout.addStretch()
-
-        self.setWidget(self.container)
+        self.setStyleSheet("""
+            QListWidget{
+                border:none;
+                background:#202123;
+                padding:15px;
+            }
+        """)
 
     def add_message(self, sender: str, text: str):
         bubble = MessageBubble(sender, text)
 
-        self.layout.insertWidget(
-            self.layout.count() - 1,
-            bubble
-        )
+        item = QListWidgetItem()
 
-        self.verticalScrollBar().setValue(
-            self.verticalScrollBar().maximum()
-        )
+        item.setSizeHint(bubble.sizeHint())
+
+        self.addItem(item)
+        self.setItemWidget(item, bubble)
+
+        self.scrollToBottom()
 
     def clear_chat(self):
-        while self.layout.count() > 1:
-            item = self.layout.takeAt(0)
-
-            if item.widget():
-                item.widget().deleteLater()
+        self.clear()

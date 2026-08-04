@@ -1,20 +1,19 @@
-from PySide6.QtCore import QObject, Signal, Slot
-
+from PySide6.QtCore import QThread, Signal
 from core.ai import GustavAI
 
 
-class AIWorker(QObject):
+class AIWorker(QThread):
     finished = Signal(str)
-    error = Signal(str)
 
-    def __init__(self):
+    def __init__(self, ai: GustavAI, text: str):
         super().__init__()
-        self.ai = GustavAI()
+        self.ai = ai
+        self.text = text
 
-    @Slot(str)
-    def ask(self, text):
+    def run(self):
         try:
-            answer = self.ai.ask(text)
-            self.finished.emit(answer)
+            answer = self.ai.ask(self.text)
         except Exception as e:
-            self.error.emit(str(e))
+            answer = f"Ошибка:\n{e}"
+
+        self.finished.emit(answer)
